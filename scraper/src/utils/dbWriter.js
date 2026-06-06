@@ -22,6 +22,7 @@ async function savePrices(validPrices, sourceUrl) {
 
       const petrolChanged = hasChanged(existing?.petrol_price, entry.petrol_price);
       const dieselChanged = hasChanged(existing?.diesel_price, entry.diesel_price);
+      const cngChanged    = hasChanged(existing?.cng_price,    entry.cng_price);
 
       // Always upsert the latest price doc
       await FuelPrice.updateOne(
@@ -31,6 +32,7 @@ async function savePrices(validPrices, sourceUrl) {
             city:          entry.city,
             petrol_price:  entry.petrol_price,
             diesel_price:  entry.diesel_price,
+            cng_price:     entry.cng_price,
             price_date:    entry.price_date,
             source_url:    sourceUrl,
             updated_at:    new Date(),
@@ -40,22 +42,24 @@ async function savePrices(validPrices, sourceUrl) {
       );
 
       // Only append history if prices actually changed
-      if (!existing || petrolChanged || dieselChanged) {
+      if (!existing || petrolChanged || dieselChanged || cngChanged) {
         await PriceHistory.create({
           state:         entry.state,
           city:          entry.city,
           petrol_price:  entry.petrol_price,
           diesel_price:  entry.diesel_price,
+          cng_price:     entry.cng_price,
           price_date:    entry.price_date,
           source_url:    sourceUrl,
           fetched_at:    new Date(),
         });
         saved++;
         logger.info('Price saved', {
-          state: entry.state,
+          state:  entry.state,
           petrol: entry.petrol_price,
           diesel: entry.diesel_price,
-          changed: { petrol: petrolChanged, diesel: dieselChanged },
+          cng:    entry.cng_price,
+          changed: { petrol: petrolChanged, diesel: dieselChanged, cng: cngChanged },
         });
       } else {
         skipped++;

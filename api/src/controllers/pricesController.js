@@ -1,6 +1,37 @@
 // api/src/controllers/pricesController.js
 const mongoose = require('mongoose');
 
+// ─── State name normalizer ────────────────────────────────────────────────────
+// Maps common variants (from GPS/geocoding APIs) to the canonical DB name
+const STATE_ALIASES = {
+  'jammu & kashmir':              'Jammu and Kashmir',
+  'jammu and kashmir':            'Jammu and Kashmir',
+  'j&k':                          'Jammu and Kashmir',
+  'andaman & nicobar':            'Andaman and Nicobar',
+  'andaman & nicobar islands':    'Andaman and Nicobar',
+  'andaman and nicobar islands':  'Andaman and Nicobar',
+  'dadra & nagar haveli':         'Dadra and Nagar Haveli',
+  'dadra and nagar haveli and daman and diu': 'Dadra and Nagar Haveli',
+  'daman & diu':                  'Daman and Diu',
+  'delhi':                        'Delhi',
+  'new delhi':                    'Delhi',
+  'ncr':                          'Delhi',
+  'odisha':                       'Odisha',
+  'orissa':                       'Odisha',
+  'uttarakhand':                  'Uttarakhand',
+  'uttaranchal':                  'Uttarakhand',
+  'telangana':                    'Telangana',
+  'pondicherry':                  'Puducherry',
+  'puducherry':                   'Puducherry',
+};
+
+function normalizeState(name) {
+  if (!name) return name;
+  const trimmed = name.trim();
+  const lower = trimmed.toLowerCase();
+  return STATE_ALIASES[lower] || trimmed;
+}
+
 // ─── Inline models (shared with scraper via MongoDB) ──────────────────────────
 const FuelPrice = mongoose.models.FuelPrice || mongoose.model('FuelPrice',
   new mongoose.Schema({
@@ -8,6 +39,7 @@ const FuelPrice = mongoose.models.FuelPrice || mongoose.model('FuelPrice',
     city:         String,
     petrol_price: Number,
     diesel_price: Number,
+    cng_price:    Number,
     price_date:   String,
     source_url:   String,
     updated_at:   Date,
@@ -20,6 +52,7 @@ const PriceHistory = mongoose.models.PriceHistory || mongoose.model('PriceHistor
     city:         String,
     petrol_price: Number,
     diesel_price: Number,
+    cng_price:    Number,
     price_date:   String,
     source_url:   String,
     fetched_at:   { type: Date, index: true },
@@ -59,7 +92,7 @@ exports.getAllLatest = async (req, res) => {
 // ─── GET /api/prices/:state ───────────────────────────────────────────────────
 exports.getStatePrice = async (req, res) => {
   try {
-    const stateName = decodeURIComponent(req.params.state);
+    const stateName = normalizeState(decodeURIComponent(req.params.state));
     const price = await FuelPrice
       .findOne({ state: new RegExp(`^${stateName}$`, 'i') }, '-__v')
       .lean();
@@ -78,7 +111,7 @@ exports.getStatePrice = async (req, res) => {
 // ─── GET /api/prices/:state/history ──────────────────────────────────────────
 exports.getStateHistory = async (req, res) => {
   try {
-    const stateName = decodeURIComponent(req.params.state);
+    const stateName = normalizeState(decodeURIComponent(req.params.state));
     const limit = Math.min(parseInt(req.query.limit) || 30, 100);
     const days = parseInt(req.query.days) || 30;
 

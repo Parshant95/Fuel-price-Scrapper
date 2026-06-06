@@ -5,6 +5,7 @@ const logger = require('../utils/logger');
 const PRICE_BOUNDS = {
   petrol: { min: 80, max: 130 },
   diesel: { min: 70, max: 120 },
+  cng:    { min: 50, max: 120 },
 };
 
 // Known Indian states for sanity check
@@ -15,7 +16,8 @@ const KNOWN_STATES = new Set([
   'nagaland', 'odisha', 'punjab', 'rajasthan', 'sikkim', 'tamil nadu',
   'telangana', 'tripura', 'uttar pradesh', 'uttarakhand', 'west bengal',
   'delhi', 'jammu and kashmir', 'ladakh', 'chandigarh', 'puducherry',
-  'andaman and nicobar', 'dadra and nagar haveli', 'daman and diu', 'lakshadweep',
+  'andaman and nicobar', 'andaman and nicobar islands', 'dadra and nagar haveli',
+  'daman and diu', 'lakshadweep', 'pondicherry',
 ]);
 
 function isValidPrice(price, type) {
@@ -65,9 +67,17 @@ function validatePrices(rawPrices) {
       }
     }
 
+    // Validate CNG price (optional — not all states have CNG)
+    if (entry.cng_price !== null && entry.cng_price !== undefined) {
+      if (!isValidPrice(entry.cng_price, 'cng')) {
+        errors.push(`cng price out of range: ${entry.cng_price}`);
+      }
+    }
+
     // Require at least one valid price
     const hasPetrol = isValidPrice(entry.petrol_price, 'petrol');
     const hasDiesel = isValidPrice(entry.diesel_price, 'diesel');
+    const hasCng    = isValidPrice(entry.cng_price, 'cng');
     if (!hasPetrol && !hasDiesel) {
       errors.push('no valid price found for either fuel type');
     }
@@ -77,11 +87,12 @@ function validatePrices(rawPrices) {
       logger.warn('Invalid entry skipped', { state: entry.state, errors });
     } else {
       valid.push({
-        state: entry.state.trim(),
-        city: entry.city?.trim() || null,
+        state:        entry.state.trim(),
+        city:         entry.city?.trim() || null,
         petrol_price: hasPetrol ? parseFloat(entry.petrol_price) : null,
         diesel_price: hasDiesel ? parseFloat(entry.diesel_price) : null,
-        price_date: entry.date || new Date().toISOString().split('T')[0],
+        cng_price:    hasCng    ? parseFloat(entry.cng_price)    : null,
+        price_date:   entry.date || new Date().toISOString().split('T')[0],
       });
     }
   }

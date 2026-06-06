@@ -21,13 +21,14 @@ Return ONLY a JSON array in this exact format:
     "city": "Mumbai",
     "petrol_price": 104.21,
     "diesel_price": 92.15,
+    "cng_price": 76.50,
     "date": "YYYY-MM-DD or as found on page"
   }
 ]
 
 Rules:
 - Include every state you can find
-- Prices must be numbers in ₹/litre
+- Prices must be numbers in ₹/litre (CNG in ₹/kg)
 - If only city prices are listed, use the major city for each state
 - If a price is not found, set it to null
 - date field: use the date mentioned on the page, or today if not found

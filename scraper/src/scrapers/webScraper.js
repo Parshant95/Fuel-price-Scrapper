@@ -48,13 +48,18 @@ async function fetchFuelPricePage() {
  * Use this if the main page doesn't have all states.
  */
 async function fetchAllStatesPricesPage() {
-  const url = `${config.scraper.sourceUrl}/petrol-price`;
+  const url = `${config.scraper.sourceUrl}/Petrol-Price-in-India.aspx`;
   logger.info('Fetching all-states page', { url });
 
   const response = await axios.get(url, {
     timeout: config.scraper.timeoutMs,
     headers: {
-      'User-Agent': 'Mozilla/5.0 (compatible; FuelBot/1.0)',
+      'User-Agent':
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 ' +
+        '(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+      'Accept-Language': 'en-IN,en;q=0.9',
+      Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      Referer: 'https://www.google.com/',
     },
   });
 

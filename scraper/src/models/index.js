@@ -4,10 +4,11 @@ const mongoose = require('mongoose');
 // ─── Latest price per state (upserted on every scrape) ────────────────────────
 const fuelPriceSchema = new mongoose.Schema(
   {
-    state:         { type: String, required: true, index: true },
+    state:         { type: String, required: true },
     city:          { type: String, default: null },
     petrol_price:  { type: Number, default: null },
     diesel_price:  { type: Number, default: null },
+    cng_price:     { type: Number, default: null },
     price_date:    { type: String },               // "YYYY-MM-DD"
     source_url:    { type: String },
     updated_at:    { type: Date, default: Date.now },
@@ -21,13 +22,14 @@ fuelPriceSchema.index({ state: 1 }, { unique: true });
 // ─── Full price history (append-only) ─────────────────────────────────────────
 const priceHistorySchema = new mongoose.Schema(
   {
-    state:         { type: String, required: true, index: true },
+    state:         { type: String, required: true },
     city:          { type: String, default: null },
     petrol_price:  { type: Number, default: null },
     diesel_price:  { type: Number, default: null },
+    cng_price:     { type: Number, default: null },
     price_date:    { type: String },
     source_url:    { type: String },
-    fetched_at:    { type: Date, default: Date.now, index: true },
+    fetched_at:    { type: Date, default: Date.now },
   },
   { timestamps: false }
 );
