@@ -1,0 +1,13 @@
+{
+  "name": "fuel-price-tracker",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": ["scraper", "api", "frontend"],
+  "scripts": {
+    "dev:api": "npm run dev --workspace=api",
+    "dev:scraper": "npm run dev --workspace=scraper",
+    "dev:frontend": "npm run dev --workspace=frontend",
+    "scrape:now": "npm run scrape --workspace=scraper",
+    "install:all": "npm install"
+  }
+}
